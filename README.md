@@ -1,76 +1,159 @@
-# TodoServer_Mongo
+# Dev && Recipe 테스트용 목업서버
 
-주어진게 json-server라 LV4 까진 json server를 쓰긴 했는데
+# API 문서
 
-솔직히 이걸로 끝까지 가는건 너무 비효율 적인거 같아 몽고db 서버를 하나 팠습니다...
+## 엔드포인트
 
-## Todos
-1. **addTodo**
-    - **URI**: `${process.env.REACT_APP_LOCAL_SERVER}/todos`
-    - **Method**: POST
-    - **Description**: 새로운 할 일을 추가합니다.
-    - **Payload**: `newTodo` - 새로 추가될 할 일의 정보를 담은 객체입니다.
+### `GET /api/recipe`
+모든 레시피를 가져옵니다.
 
-2. **getTodos**
-    - **URI**: `${process.env.REACT_APP_LOCAL_SERVER}/todos`
-    - **Method**: GET
-    - **Description**: 모든 할 일을 가져옵니다.
+**응답**
 
-3. **updateDoneTodo**
-    - **URI**: `${process.env.REACT_APP_LOCAL_SERVER}/todos/{id}`
-    - **Method**: PATCH
-    - **Description**: 할 일의 완료 상태를 업데이트합니다.
-    - **Params**: `id` - 업데이트할 할 일의 ID입니다.
-    - **Payload**: `{done:!(todo.done)}` - 완료 상태를 반전시키는 객체입니다.
+- 성공 시 `200 OK`
 
-4. **updateTodo**
-    - **URI**: `${process.env.REACT_APP_LOCAL_SERVER}/todos/{id}`
-    - **Method**: PATCH
-    - **Description**: 할 일의 내용을 업데이트합니다.
-    - **Params**: `id` - 업데이트할 할 일의 ID입니다.
-    - **Payload**: `{content:sendData.content}` - 할 일의 새로운 내용을 담은 객체입니다.
+```json
+[
+  {
+    "id": String,
+    "subtitle": String,
+    "category": String,
+    "title": String,
+    "ingredient": String,
+    "tip": String,
+    "url": String,
+    "writerEmail": String
+  }
+]
+```
 
-5. **deleteTodo**
-    - **URI**: `${process.env.REACT_APP_LOCAL_SERVER}/todos/{id}`
-    - **Method**: DELETE
-    - **Description**: 특정 할 일을 삭제합니다.
-    - **Params**: `id` - 삭제할 할 일의 ID입니다.
+### `GET /api/recipe/:recipeId`
+주어진 레시피 id에 해당하는 레시피를 가져옵니다.
 
-## User
+**매개변수**
 
-1. **GET /user**: 모든 사용자의 정보를 가져옵니다.
-   - Response: 사용자 정보 배열(JSON)
+- `recipeId`: 레시피의 ID
 
-2. **GET /usertoken**: 모든 사용자의 정보를 가져오기 전에 JWT 토큰을 통한 인증을 수행합니다.
-   - Headers: Authorization: Bearer \<token>
-   - Response: 사용자 정보 배열(JSON)
+**응답**
 
-3. **GET /user/:email**: 주어진 이메일에 해당하는 사용자 정보를 가져옵니다.
-   - Parameters: email (URL 경로에 포함)
-   - Response: 해당 이메일의 사용자 정보(JSON)
+- 성공 시 `200 OK`
+- 주어진 id에 해당하는 레시피가 없을 경우 `404 Not Found`
 
-4. **POST /user**: 새 사용자를 생성합니다. 이메일, 닉네임, 비밀번호 필요.
-   - Body: email, nickName, password
-   - Response: 생성된 사용자 정보(JSON)
+```json
+{
+  "id": String,
+  "subtitle": String,
+  "category": String,
+  "title": String,
+  "ingredient": String,
+  "tip": String,
+  "url": String,
+  "writerEmail": String
+}
+```
 
-5. **POST /user/login**: 사용자 로그인을 처리합니다. 이메일, 비밀번호 필요.
-   - Body: email, password
-   - Response: 로그인된 사용자 정보와 JWT 토큰(JSON)
+### `POST /api/recipe`
+새로운 레시피를 생성합니다.
 
-6. **POST /user/logout**: 로그인된 사용자를 로그아웃시킵니다.
-   - Response: "ok" (문자열)
+**매개변수**
 
-7. **PATCH /user/:email/done**: 주어진 이메일의 사용자의 done 상태를 업데이트합니다.
-   - Parameters: email (URL 경로에 포함)
-   - Body: done
-   - Response: 업데이트된 사용자 정보(JSON)
+- `image`: 레시피의 이미지
+- `id`: 레시피의 ID
+- `subtitle`: 레시피의 부제목
+- `category`: 레시피의 카테고리
+- `title`: 레시피의 제목
+- `ingredients`: 레시피의 재료
+- `tip`: 레시피의 팁
+- `url`: 레시피의 URL
+- `writerEmail`: 작성자의 이메일
 
-8. **PATCH /user/:email/nickName**: 주어진 이메일의 사용자의 닉네임을 업데이트합니다.
-   - Parameters: email (URL 경로에 포함)
-   - Body: nickName
-   - Response: 업데이트된 사용자 정보(JSON)
+**응답**
 
-9. **DELETE /user/:email**: 주어진 이메일의 사용자를 삭제합니다.
-   - Parameters: email (URL 경로에 포함)
-   - Response: "User successfully deleted" (문자열)
-   
+- 성공 시 `200 OK`
+- 레시피 생성 중 문제 발생 시 `500 Internal Server Error`
+
+### `PUT /api/recipe/:id`
+기존 레시피를 업데이트합니다.
+
+**매개변수**
+
+- `id`: 레시피의 ID
+- `image`: 레시피의 이미지
+- `subtitle`: 레시피의 부제목
+- `category`: 레시피의 카테고리
+- `title`: 레시피의 제목
+- `ingredients`: 레시피의 재료
+- `tip`: 레시피의 팁
+- `url`: 레시피의 URL
+- `writerEmail`: 작성자의 이메일
+
+**응답**
+
+- 성공 시 `200 OK`와 함께 업데이트된 레시피 정보 반환
+- 레시피 업데이트 중 문제 발생 시 `500 Internal Server Error`
+
+죄송합니다, 계속 작성하겠습니다.
+
+### `DELETE /api/recipe/:recipeId`
+주어진 레시피 ID에 해당하는 레시피를 삭제합니다.
+
+**매개변수**
+
+- `recipeId`: 삭제할 레시피의 ID
+
+**응답**
+
+- 성공 시 `200 OK`와 함께 삭제 성공 메시지 반환
+- 레시피를 찾지 못했을 경우 `404 Not Found`
+- 레시피 삭제 중 문제 발생 시 `500 Internal Server Error`
+
+### `GET /api/recipe/comments/:recipeId`
+특정 레시피에 대한 모든 댓글을 가져옵니다.
+
+**매개변수**
+
+- `recipeId`: 댓글을 조회할 레시피의 ID
+
+**응답**
+
+- 성공 시 `200 OK`
+- 댓글 조회 중 문제 발생 시 `500 Internal Server Error`
+
+### `POST /api/recipe/comment`
+새로운 댓글을 생성합니다.
+
+**매개변수**
+
+- `image`: 댓글의 이미지
+- `commentId`: 댓글의 ID
+- `recipeId`: 댓글이 작성될 레시피의 ID
+- `comment`: 댓글 내용
+- `writerEmail`: 댓글 작성자의 이메일
+
+**응답**
+
+- 성공 시 `201 Created`
+- 댓글 생성 중 문제 발생 시 `400 Bad Request`
+
+### `DELETE /api/recipe/comment/:commentId`
+특정 댓글을 삭제합니다.
+
+**매개변수**
+
+- `commentId`: 삭제할 댓글의 ID
+
+**응답**
+
+- 성공 시 `200 OK`
+- 댓글 삭제 중 문제 발생 시 `500 Internal Server Error`
+
+### `GET /api/recipe/contents/:recipeId`
+특정 레시피의 모든 컨텐츠를 가져옵니다.
+
+**매개변수**
+
+- `recipeId`: 컨텐츠를 조회할 레시피의 ID
+
+**응답**
+
+- 성공 시 `200 OK`
+- 컨텐츠 조회 중 문제 발생 시 `500 Internal Server Error`
