@@ -27,6 +27,7 @@
   }
 ]
 ```
+---
 
 ### `GET /api/recipe/:recipeId`
 주어진 레시피 id에 해당하는 레시피를 가져옵니다.
@@ -52,6 +53,7 @@
   "writerEmail": String
 }
 ```
+---
 
 ### `POST /api/recipe`
 새로운 레시피를 생성합니다.
@@ -73,6 +75,8 @@
 - 성공 시 `200 OK`
 - 레시피 생성 중 문제 발생 시 `500 Internal Server Error`
 
+---
+
 ### `PUT /api/recipe/:id`
 기존 레시피를 업데이트합니다.
 
@@ -93,7 +97,7 @@
 - 성공 시 `200 OK`와 함께 업데이트된 레시피 정보 반환
 - 레시피 업데이트 중 문제 발생 시 `500 Internal Server Error`
 
-죄송합니다, 계속 작성하겠습니다.
+---
 
 ### `DELETE /api/recipe/:recipeId`
 주어진 레시피 ID에 해당하는 레시피를 삭제합니다.
@@ -108,6 +112,8 @@
 - 레시피를 찾지 못했을 경우 `404 Not Found`
 - 레시피 삭제 중 문제 발생 시 `500 Internal Server Error`
 
+---
+
 ### `GET /api/recipe/comments/:recipeId`
 특정 레시피에 대한 모든 댓글을 가져옵니다.
 
@@ -119,6 +125,8 @@
 
 - 성공 시 `200 OK`
 - 댓글 조회 중 문제 발생 시 `500 Internal Server Error`
+
+---
 
 ### `POST /api/recipe/comment`
 새로운 댓글을 생성합니다.
@@ -135,7 +143,7 @@
 
 - 성공 시 `201 Created`
 - 댓글 생성 중 문제 발생 시 `400 Bad Request`
-
+---
 ### `DELETE /api/recipe/comment/:commentId`
 특정 댓글을 삭제합니다.
 
@@ -147,7 +155,7 @@
 
 - 성공 시 `200 OK`
 - 댓글 삭제 중 문제 발생 시 `500 Internal Server Error`
-
+---
 ### `GET /api/recipe/contents/:recipeId`
 특정 레시피의 모든 컨텐츠를 가져옵니다.
 
@@ -159,12 +167,10 @@
 
 - 성공 시 `200 OK`
 - 컨텐츠 조회 중 문제 발생 시 `500 Internal Server Error`
+---
 
 # /api/user
 
-## API 문서
-
----
 
 ### 1. GET '/api/user'
 
