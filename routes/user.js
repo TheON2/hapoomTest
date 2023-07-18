@@ -234,20 +234,6 @@ module.exports = function(app, User)
     });
   });
 
-  app.patch('/api/user/:email/done', auth, async (req, res) => {
-    try {
-      let user = await User.findOne({ email: req.params.email });
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-      user.done = req.body.done;
-      await user.save();
-      res.json(user);
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  });
-
   app.patch('/api/user/:email/nickName', auth, async (req, res) => {
     try {
       let user = await User.findOne({ email: req.params.email });
