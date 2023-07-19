@@ -319,3 +319,54 @@
 - 200 OK: 요청이 성공하면 삭제된 사용자에 대한 메시지를 반환합니다.
 - 404 Not Found: 사용자를 찾을 수 없을 때 반환됩니다.
 - 500 Internal Server Error: 서버 오류가 발생했을 때 반환됩니다.
+
+알겠습니다, 한글로 API 문서를 작성해 보겠습니다.
+
+### 레시피의 댓글 가져오기
+
+**엔드포인트:** `/api/recipe/comments/:recipeId`
+
+**메서드:** `GET`
+
+**URL 파라미터:**
+- `recipeId`: 댓글을 가져올 레시피의 고유 아이디
+
+**성공 시 응답:**
+- `200 OK` 상태 코드와 함께 해당 레시피의 댓글들이 JSON 형태로 반환됩니다.
+
+**실패 시 응답:**
+- `500 Internal Server Error` 상태 코드와 에러 메시지를 반환
+
+### 댓글 작성하기
+
+**엔드포인트:** `/api/recipe/comment`
+
+**메서드:** `POST`
+
+**요청 본문:**
+- `comment.commentId`: 생성할 댓글의 고유 아이디
+- `comment.recipeId`: 레시피의 고유 아이디
+- `comment.comment`: 댓글의 내용
+- `comment.writerEmail`: 작성자의 이메일
+
+**성공 시 응답:**
+- `201 Created` 상태 코드와 함께 작성된 댓글 정보가 JSON 형태로 반환됩니다.
+
+**실패 시 응답:**
+- `400 Bad Request` 상태 코드와 에러 메시지를 반환
+
+### 댓글 삭제하기
+
+**엔드포인트:** `/api/recipe/comment/:commentId`
+
+**메서드:** `DELETE`
+
+**URL 파라미터:**
+- `commentId`: 삭제할 댓글의 고유 아이디
+
+**성공 시 응답:**
+- `200 OK` 상태 코드와 삭제된 댓글의 정보를 JSON 형태로 반환합니다.
+
+**실패 시 응답:**
+- `500 Internal Server Error` 상태 코드와 에러 메시지를 반환
+
