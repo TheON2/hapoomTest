@@ -21,22 +21,19 @@ module.exports = function(app, User)
         return res.redirect(`${process.env.ORIGIN}/Login`);
       }
       try {
-        console.log('몽고유저 조회함 카카오:',user)
-        let mongoUser = await User.findOne({ email: user._json.kakao_account.email });
-        if (!mongoUser) {
-          mongoUser = new User({
+        console.log('시퀄라이즈 유저 조회함 카카오:',user);
+        let sequelizeUser = await User.findOne({ where: { email: user._json.kakao_account.email } });
+        if (!sequelizeUser) {
+          sequelizeUser = await User.create({
             email: user._json.kakao_account.email,
-            nickName:user._json.properties.nickname,
-            password:user._json.kakao_account.email,
-            method:'kakao',
-            profileUrl:user._json.properties.thumbnail_image,
-            profileContent:'카카오로 회원가입 하였습니다.',
+            nickname: user._json.properties.nickname,
+            password: user._json.kakao_account.email,
+            method: 'kakao',
           });
-          await mongoUser.save();
         }
-        console.log('몽고유저 생성됨 카카오:',mongoUser)
+        console.log('시퀄라이즈 유저 생성됨 카카오:', sequelizeUser);
         const refreshPayload = {
-          email: mongoUser.email,
+          email: sequelizeUser.email,
           exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 1), // Refresh token valid for 1 days
         };
         const refreshToken = jwt.sign(refreshPayload, process.env.JWT_REFRESH_SECRET);
@@ -59,22 +56,19 @@ module.exports = function(app, User)
         return res.redirect(`${process.env.ORIGIN}/Login`);
       }
       try {
-        console.log('몽고유저 조회함 네이버:',user)
-        let mongoUser = await User.findOne({ email: user.email });
-        if (!mongoUser) {
-          mongoUser = new User({
+        console.log('시퀄라이즈 유저 조회함 네이버:',user);
+        let sequelizeUser = await User.findOne({ where: { email: user.email } });
+        if (!sequelizeUser) {
+          sequelizeUser = await User.create({
             email: user.email,
-            nickName:user.nickname,
-            password:user.email,
-            method:'naver',
-            profileUrl:user.profileImage,
-            profileContent:'네이버로 회원가입 하였습니다.',
+            nickname: user.nickname,
+            password: user.email,
+            method: 'naver',
           });
-          await mongoUser.save();
         }
-        console.log('몽고유저 생성됨 네이버:',mongoUser)
+        console.log('시퀄라이즈 유저 생성됨 네이버:', sequelizeUser);
         const refreshPayload = {
-          email: mongoUser.email,
+          email: sequelizeUser.email,
           exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 1), // Refresh token valid for 1 days
         };
         const refreshToken = jwt.sign(refreshPayload, process.env.JWT_REFRESH_SECRET);
@@ -96,25 +90,19 @@ module.exports = function(app, User)
       if (err) {
         return next(err);
       }
-      // if (!user) {
-      //   return res.redirect(`${process.env.ORIGIN}/Login`);
-      // }
       try {
-        console.log('몽고유저 조회함 구글:',user)
-        let mongoUser = await User.findOne({ email: user.email });
-        if (!mongoUser) {
-          mongoUser = new User({
+        console.log('시퀄라이즈 유저 조회함 구글:',user);
+        let sequelizeUser = await User.findOne({ where: { email: user.email } });
+        if (!sequelizeUser) {
+          sequelizeUser = await User.create({
             email: user.email,
-            nickName:user.displayName,
-            password:user.email,
-            method:'google',
-            profileUrl:user.picture,
-            profileContent:'구글로 회원가입 하였습니다.',
+            nickname: user.displayName,
+            password: user.email,
+            method: 'google',
           });
-          await mongoUser.save();
         }
         const refreshPayload = {
-          email: mongoUser.email,
+          email: sequelizeUser.email,
           exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 1), // Refresh token valid for 1 days
         };
         const refreshToken = jwt.sign(refreshPayload, process.env.JWT_REFRESH_SECRET);
@@ -126,31 +114,26 @@ module.exports = function(app, User)
     })(req, res, next);
   });
 
-  app.get('/api/user', auth, async (req, res) => {
-    const user = await User.find({});
-    res.json(user);
-  });
-
-  app.get('/api/token', auth, async (req, res) => { // auth 미들웨어 적용
+  app.get('/api/user/token', auth, async (req, res) => {
     try {
-      const user = await User.findOne({ email: req.user.email });
-      console.log('액세스토큰',req.user.email)
+      const user = await User.findOne({ where: { email: req.user.email }});
+      console.log('액세스토큰',req.user.email);
       if (!user) res.status(404).send("No user found");
-      const userResponse = user.toObject();
+      const userResponse = user.get({ plain: true });
       delete userResponse.password;
-      console.log(userResponse)
-      return res.status(200).json({userResponse});
+      console.log(userResponse);
+      return res.status(200).json({email: userResponse.email, nickname: userResponse.nickname});
     } catch (error) {
       res.status(500).send(error);
     }
   });
 
-  app.get('/refreshToken',refreshauth, async (req, res) => { // auth 미들웨어 적용
+  app.get('/refreshToken', refreshauth, async (req, res) => {
     try {
-      console.log('리프레시토큰',req.user.email)
+      console.log('리프레시토큰', req.user.email);
       const payload = {
         email: req.user.email,
-        exp: Math.floor(Date.now() / 1000) + (60 * 30), //토큰 유효기간 30분
+        exp: Math.floor(Date.now() / 1000) + (60 * 30),
       };
       const token = jwt.sign(payload, process.env.JWT_SECRET);
       return res.status(200).json({token});
@@ -161,56 +144,53 @@ module.exports = function(app, User)
 
   app.get('/api/user/:email', auth, async (req, res) => {
     try {
-      const user = await User.findOne({ email: req.params.email });
+      const user = await User.findOne({ where: { email: req.params.email }, attributes: { exclude: ['password'] } });
       if (!user) res.status(404).send("No user found");
-      const userResponse = user.toObject();
-      delete userResponse.password;
-      res.send(userResponse);
+      res.send(user);
     } catch (error) {
       res.status(500).send(error);
     }
   });
 
-  app.post('/api/user', async (req, res,next) => {
+  app.post('/api/user/signup', async (req, res, next) => {
     try {
-      const exUser = await User.findOne({email: req.body.email});
+      const exUser = await User.findOne({ where: { email: req.body.email } });
       if (exUser) {
         return res.status(403).send("이미 사용중인 아이디입니다");
       }
-    const hashedPassword = await bcrypt.hash(req.body.password, 12)
-    const user = new User({
-      email: req.body.email,
-      nickName: req.body.nickName,
-      password: hashedPassword,
-      method:'direct',
-      profileUrl:'https://avatars.githubusercontent.com/u/32028454?s=400&u=7993b49546f6ebb45968dbafa6c97c5789ec2254&v=4',
-      profileContent:'메인페이지로 회원가입 하였습니다.',
-    })
-    const savedUser = await user.save();
-    res.json(savedUser);
-  } catch(error){
-    console.error(error);
-    next(error)
-  }
+      const hashedPassword = await bcrypt.hash(req.body.password, 12);
+      const user = await User.create({
+        email: req.body.email,
+        nickname: req.body.nickname,
+        password: hashedPassword,
+        method:'direct',
+      });
+      const userResponse = user.get({ plain: true });
+      delete userResponse.password;
+      res.json(userResponse);
+    } catch(error){
+      console.error(error);
+      next(error)
+    }
   });
 
   app.post("/api/user/login", (req, res, next) => {
-    passport.authenticate('local', (err, user, info) => {
+    passport.authenticate('local', async (err, user, info) => {
       if (err) {
         console.log(err);
         return next(err);
       }
       if (info) {
-        return res.status(401).send(info.reason);
+        return res.status(401).send(info.message); // Modified from 'info.reason'
       }
-      return req.login(user, async (loginErr) => {
+      req.logIn(user, async (loginErr) => {
         if (loginErr) {
           console.log(err);
           return next(loginErr);
         }
         const payload = {
           email: user.email,
-          exp: Math.floor(Date.now() / 1000) + (60 * 30), //토큰 유효기간 30분
+          exp: Math.floor(Date.now() / 1000) + (60 * 30), // 토큰 유효기간 30분
         };
         const refreshPayload = {
           email: user.email,
@@ -219,7 +199,7 @@ module.exports = function(app, User)
         const token = jwt.sign(payload, process.env.JWT_SECRET);
         const refreshToken = jwt.sign(refreshPayload, process.env.JWT_REFRESH_SECRET);
         res.cookie('refreshToken', refreshToken, { httpOnly: true, sameSite: 'None', secure: true });
-        const userResponse = user.toObject();
+        const userResponse = user.get({ plain: true });
         delete userResponse.password;
         return res.status(200).json({ userResponse, token });
       });
@@ -236,11 +216,11 @@ module.exports = function(app, User)
 
   app.patch('/api/user/:email/nickName', auth, async (req, res) => {
     try {
-      let user = await User.findOne({ email: req.params.email });
+      let user = await User.findOne({ where: { email: req.params.email } });
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-      user.nickName = req.body.nickName;
+      user.nickname = req.body.nickname; // Assuming that the field name is 'nickname' not 'nickName'
       await user.save();
       res.json(user);
     } catch (error) {
@@ -250,7 +230,7 @@ module.exports = function(app, User)
 
   app.delete('/api/user/:email', auth, async (req, res) => {
     try {
-      let user = await User.findOneAndDelete({ email: req.params.email });
+      let user = await User.destroy({ where: { email: req.params.email } });
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }

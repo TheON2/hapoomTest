@@ -8,12 +8,10 @@ const passportConfig = require("./passport");
 const passport = require("passport");
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
-const Recipe = require('./models/recipe');
-const Comment = require('./models/comment');
-const Content = require('./models/content');
-const User = require('./models/user');
 const path = require('path');
 const dotenv = require("dotenv");
+const { sequelize, User, Post, Report, Like, Image, Comment } = require("./models");
+const axios = require("axios");
 
 dotenv.config();
 passportConfig();
@@ -28,6 +26,13 @@ app.use(cors({
   origin:origin,
   credentials:true,
 }))
+
+sequelize.sync()
+  .then(() => {
+    console.log('Database & tables created!');
+  });
+
+app.use('/uploads', express.static('uploads'));
 app.use('/',express.static(path.join(__dirname, 'uploads')));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
@@ -42,14 +47,13 @@ app.use(
 
 app.use(passport.initialize());
 app.use(passport.session());
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('Connected to MongoDB server'))
-  .catch((err) => console.error(err));
 app.use(passport.initialize());
 
-const routerRecipes = require('./routes/recipes')(app, Recipe,Content,Comment);
 const routerUser = require('./routes/user')(app, User);
+const routerPost = require('./routes/post')(app, User, Image, Post);
+
 
 let server = app.listen(port, function () {
   console.log("Express server has started on port " + port)
 });
+

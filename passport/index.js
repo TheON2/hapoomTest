@@ -1,6 +1,6 @@
 const passport = require("passport");
 const local = require("./local");
-const User = require("../models/user");
+const { User } = require("../models");
 
 module.exports = () => {
   passport.serializeUser((user, done) => {
@@ -9,7 +9,7 @@ module.exports = () => {
   });
   passport.deserializeUser(async (email, done) => {
     try {
-      const user = await User.findOne({ email:email });
+      const user = await User.findOne({ where: { email: email }});
       done(null, user);
     } catch (error) {
       console.error(error);
