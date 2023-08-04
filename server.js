@@ -50,7 +50,7 @@ app.use(passport.session());
 app.use(passport.initialize());
 
 const routerUser = require('./routes/user')(app, User);
-const routerPost = require('./routes/post')(app, User, Image, Post);
+const routerPost = require('./routes/post')(app, User, Image, Post,Like,Report);
 
 
 let server = app.listen(port, function () {
